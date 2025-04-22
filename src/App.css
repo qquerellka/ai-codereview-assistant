@@ -1,42 +1,106 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+body {
+  min-width: 100vw;
+  min-height: 100vh;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.page__container {
+  display: flex;
+  flex-direction: column;
+  width: 60%;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.relative {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+  background-color: white;
+}
+
+
+.ai-loader {
+  display: flex;
+  gap: 4px;
+  margin: 8px 0 12px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  background-color: #9ca3af; /* gray-400 */
+  border-radius: 50%;
+  animation: blink 1.4s infinite both;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0%, 80%, 100% {
+    opacity: 0.3;
+    transform: scale(0.9);
   }
-  to {
-    transform: rotate(360deg);
+  40% {
+    opacity: 1;
+    transform: scale(1.2);
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.chat__messages {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 80vh;
+  padding-right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.card {
-  padding: 2em;
+.chat__messages {
+  overflow-y: auto;
+
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE и Edge */
 }
 
-.read-the-docs {
-  color: #888;
+.chat__messages::-webkit-scrollbar {
+  display: none;                /* Chrome, Safari, Opera */
+}
+
+
+
+
+
+
+.page__container {
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+  height: 100vh; /* 👈 фиксируем высоту */
+}
+
+
+.chat__messages {
+  flex: 1;                 /* ⬆️ займи всё доступное место */
+  overflow-y: auto;
+  padding-right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
