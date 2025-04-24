@@ -1,6 +1,6 @@
 import { FC, useEffect } from "react";
 import styles from "./SentMessage.module.css";
-import Prism from "prismjs";
+import * as Prism from "prismjs";
 import "prismjs/themes/prism-okaidia.css"; // 👈 тёмная тема
 // import "prismjs/themes/prism.css";
 import "prismjs/components/prism-javascript";

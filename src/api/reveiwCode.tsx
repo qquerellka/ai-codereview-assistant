@@ -12,10 +12,8 @@ const MOCK_COMMENTS = [
 ];
 
 export const reviewCode = async (code: string): Promise<string> => {
-  // Эмуляция задержки
   await new Promise((res) => setTimeout(res, 3000));
 
-  // Выбираем случайный комментарий
   const index = Math.floor(Math.random() * MOCK_COMMENTS.length);
   return MOCK_COMMENTS[index];
 };

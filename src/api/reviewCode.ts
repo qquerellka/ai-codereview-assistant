@@ -13,9 +13,30 @@ const MOCK_COMMENTS = [
 
 export const reviewCode = async (code: string): Promise<string> => {
   // Эмуляция задержки
-  await new Promise((res) => setTimeout(res, 30000));
+  await new Promise((res) => setTimeout(res, 3000));
 
   // Выбираем случайный комментарий
   const index = Math.floor(Math.random() * MOCK_COMMENTS.length);
   return MOCK_COMMENTS[index];
 };
+
+// export type LineComment = {
+//   line: number;
+//   comment: string;
+// };
+
+// export const reviewCode = async (code: string): Promise<LineComment[]> => {
+//   await new Promise((res) => setTimeout(res, 1000)); // ⏳ задержка
+
+//   const lines = code.split('\n');
+//   const comments: LineComment[] = [];
+
+//   if (lines.length >= 2) {
+//     comments.push({ line: 2, comment: "Рассмотри использование const вместо let." });
+//   }
+//   if (lines.length >= 4) {
+//     comments.push({ line: 4, comment: "Добавь проверку ошибок." });
+//   }
+
+//   return comments;
+// };

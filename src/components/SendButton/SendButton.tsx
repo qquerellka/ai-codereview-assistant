@@ -1,6 +1,5 @@
 import { FC } from "react";
 import styles from "./SendButton.module.css";
-import topArrow from "../../assets/topArrow.png"
 interface SendButtonProps {
   disabled: boolean;
   onClick: () => void;
@@ -15,7 +14,7 @@ export const SendButton: FC<SendButtonProps> = ({ disabled, onClick }) => {
       onClick={onClick}
       disabled={disabled}
       className={buttonClass}
-      aria-label="Отправить сообщение"
+      aria-label="Отправить код"
     >
       Отправить
     </button>
