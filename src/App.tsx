@@ -3,12 +3,17 @@ import "./App.css";
 import { Textarea } from "./components/Textarea/Textarea";
 import { SentMessage } from "./components/SentMessage/SentMessage";
 import { AiMessage } from "./components/AiMessage/AiMessage";
-import { reviewCode } from "./api/reveiwCode";
+import { reviewCode } from "./api/reviewCode";
 
-type Message = {
-  type: "user" | "ai";
-  content: string;
+type LineComment = {
+  line: number;
+  comment: string;
+  suggestion?: string;
 };
+
+type Message =
+  | { type: "user"; content: string; timestamp: string }
+  | { type: "ai"; comments: LineComment[]; timestamp: string };
 
 const LOCAL_STORAGE_KEY = "ai_review_chat_history";
 
@@ -18,9 +23,8 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const hasInitialized = useRef(false); // ✅ предотвращает раннюю запись в localStorage
+  const hasInitialized = useRef(false);
 
-  // Загрузка истории при монтировании
   useEffect(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (saved) {
@@ -30,18 +34,14 @@ function App() {
           setMessages(parsed);
         }
       } catch (e) {
-        console.warn("Ошибка парсинга localStorage:", e);
+        console.error("Ошибка чтения localStorage", e);
       }
     }
-  
-    // ⚠️ Ставим true только ПОСЛЕ setMessages
     setTimeout(() => {
       hasInitialized.current = true;
-    }, 0); // через event loop
+    }, 0);
   }, []);
-  
 
-  // Сохранение истории при изменении сообщений
   useEffect(() => {
     if (!hasInitialized.current) return;
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(messages));
@@ -56,14 +56,52 @@ function App() {
       return;
     }
 
-    setMessages((prev) => [...prev, { type: "user", content: val }]);
+    const timestamp = new Date().toLocaleTimeString();
+    setMessages((prev) => [...prev, { type: "user", content: val, timestamp }]);
     setCode("");
     setIsWaitingForResponse(true);
 
-    const aiResponse = await reviewCode(val);
+    try {
+      const response = await reviewCode(val);
+      const raw = response.choices[0].message.content;
 
-    setMessages((prev) => [...prev, { type: "ai", content: aiResponse }]);
-    setIsWaitingForResponse(false);
+      let comments: LineComment[] = [];
+      try {
+        const parsed = JSON.parse(raw || "{}");
+        if (Array.isArray(parsed.comments)) {
+          comments = parsed.comments;
+        }
+      } catch {
+        console.warn("AI вернул некорректный JSON");
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        { type: "ai", comments, timestamp: new Date().toLocaleTimeString() },
+      ]);
+    } catch (error) {
+      console.error("Ошибка AI", error);
+    } finally {
+      setIsWaitingForResponse(false);
+    }
+  };
+
+  const handleClearHistory = () => {
+    setMessages([]);
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      setCode(text);
+      setTouched(true);
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -72,10 +110,11 @@ function App() {
         <div className="chat__messages">
           {messages.map((msg, index) =>
             msg.type === "user" ? (
-              <SentMessage key={index} code={msg.content} />
+              <SentMessage key={index} code={msg.content} timestamp={msg.timestamp} />
             ) : (
-              <AiMessage key={index} text={msg.content} />
-              
+              msg.type === "ai" && msg.comments && (
+                <AiMessage key={index} comments={msg.comments} timestamp={msg.timestamp} />
+              )
             )
           )}
 
@@ -90,10 +129,12 @@ function App() {
           value={code}
           onChange={(e) => setCode(e.target.value)}
           onSend={handleSend}
+          onFileUpload={handleFileUpload}
+          onClearChat={handleClearHistory}
           errorMessage="Минимум 10 символов"
           isInvalid={isInvalid}
           autoGrow
-          placeholder="Введите код..."
+          placeholder="Введите код или прикрепите файл..."
           disabled={isWaitingForResponse}
         />
       </div>

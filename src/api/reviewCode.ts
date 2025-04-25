@@ -1,42 +1,82 @@
-const MOCK_COMMENTS = [
-  "AI комментарий: попробуйте использовать `const` вместо `let`.",
-  "AI комментарий: можно вынести эту часть кода в отдельную функцию.",
-  "AI комментарий: избегайте лишних условий внутри цикла.",
-  "AI комментарий: хорошая структура, но можно улучшить читаемость.",
-  "AI комментарий: стоит добавить проверку на `null` перед использованием.",
-  "AI комментарий: магические числа лучше выносить в константы.",
-  "AI комментарий: переменная названа слишком абстрактно.",
-  "AI комментарий: возможно, стоит использовать `map()` вместо `forEach`.",
-  "AI комментарий: хорошо! Только можно добавить комментарии к коду.",
-  "AI комментарий: подумайте о типизации аргументов."
-];
-
-export const reviewCode = async (code: string): Promise<string> => {
-  // Эмуляция задержки
-  await new Promise((res) => setTimeout(res, 3000));
-
-  // Выбираем случайный комментарий
-  const index = Math.floor(Math.random() * MOCK_COMMENTS.length);
-  return MOCK_COMMENTS[index];
+export type LineComment = {
+  line: number;
+  comment: string;
+  suggestion?: string;
+  type?: "info" | "warning" | "error";
 };
 
-// export type LineComment = {
-//   line: number;
-//   comment: string;
-// };
+const randomFrom = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
-// export const reviewCode = async (code: string): Promise<LineComment[]> => {
-//   await new Promise((res) => setTimeout(res, 1000)); // ⏳ задержка
+export const reviewCode = async (code: string): Promise<{
+  choices: [
+    {
+      message: {
+        role: "assistant";
+        content: string;
+      };
+    }
+  ];
+}> => {
+  await new Promise((res) => setTimeout(res, 1000));
 
-//   const lines = code.split('\n');
-//   const comments: LineComment[] = [];
+  const lines = code.split("\n");
+  const comments: LineComment[] = [];
 
-//   if (lines.length >= 2) {
-//     comments.push({ line: 2, comment: "Рассмотри использование const вместо let." });
-//   }
-//   if (lines.length >= 4) {
-//     comments.push({ line: 4, comment: "Добавь проверку ошибок." });
-//   }
+  const suggestions = [
+    "Рассмотрите использование тернарного оператора",
+    "Добавьте проверку на null или undefined",
+    "Разбейте длинную строку на несколько",
+    "Вынесите это выражение в отдельную функцию",
+    "Используйте строгую проверку (=== вместо ==)",
+    "Рассмотрите использование optional chaining",
+    "Добавьте JSDoc комментарий над функцией",
+    "Избегайте магических чисел — введите константу",
+    "Можно использовать деструктуризацию",
+    "Подумайте о переименовании переменной для ясности"
+  ];
 
-//   return comments;
-// };
+  const replacementExamples = [
+    { match: "var", suggest: "const" },
+    { match: "==", suggest: "===" },
+    { match: "!==", suggest: "!=" },
+    { match: "function", suggest: "const fn = () =>" },
+    { match: "&&", suggest: "?.", note: "можно использовать optional chaining" }
+  ];
+
+  const availableLines = lines.map((_, i) => i + 1);
+  const shuffled = availableLines.sort(() => 0.5 - Math.random());
+  const numberOfComments = Math.min(8, lines.length);
+
+  for (let i = 0; i < numberOfComments; i++) {
+    const line = shuffled[i];
+    const rawLine = lines[line - 1] || "";
+    const suggestionText = randomFrom(suggestions);
+
+    let suggestion: string | undefined = undefined;
+    const replacement = replacementExamples.find((r) => rawLine.includes(r.match));
+    if (replacement) {
+      suggestion = rawLine.replace(replacement.match, replacement.suggest);
+    } else {
+      suggestion = suggestionText;
+    }
+
+    comments.push({
+      line,
+      comment: `Комментарий к строке ${line}: ${suggestionText}.`,
+      suggestion,
+      type: randomFrom(["info", "warning", "error"])
+    });
+  }
+  comments.sort((a, b) => a.line - b.line);
+
+  return {
+    choices: [
+      {
+        message: {
+          role: "assistant",
+          content: JSON.stringify({ comments })
+        }
+      }
+    ]
+  };
+};

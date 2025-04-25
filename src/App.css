@@ -104,3 +104,37 @@ body {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+
+.clear-button {
+  padding: 6px 12px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.clear-button:hover {
+  background-color: #dc2626;
+}
+
+
+.file-upload {
+  margin-bottom: 10px;
+}
+
+.file-upload-label {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: #f3f4f6;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.file-upload-label:hover {
+  background-color: #e5e7eb;
+}

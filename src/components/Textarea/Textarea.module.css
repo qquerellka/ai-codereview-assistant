@@ -37,3 +37,10 @@
   color: #ef4444;
   margin-top: 2px;
 }
+
+
+.buttonRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
